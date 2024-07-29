@@ -1,24 +1,67 @@
-import { useNavigate, useSearchParams } from 'react-router-dom'
-import styles from './Map.module.css'
+// import { useNavigate } from "react-router-dom";
+import { MapContainer, TileLayer, Marker, Popup, useMap, useMapEvent } from "react-leaflet";
+
+import styles from "./Map.module.css";
+import { useEffect, useState } from "react";
+import { useCities } from "../contexts/CitiesContext";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 function Map() {
+  const [position, setPosition] = useState([40, 0]);
+  const { cities } = useCities();
+  const [searchParams] = useSearchParams();
+  const lng = searchParams.get("lng");
+  const lat = searchParams.get("lat");
 
-    const navigate = useNavigate()
-    const [searchParams, setSearchParams] = useSearchParams()
-    const lng = searchParams.get('lng')
-    const lat = searchParams.get('lat')
+  useEffect(()=>{
+    if(lng && lat) setPosition([lat, lng])
+  }, [lat, lng])
 
-    return (
-        <div className={styles.mapContainer} onClick={() => {
-            navigate("form")
-        }}>
-            POSITION = {lng}, {lat}
-
-            <button onClick={() => {
-                setSearchParams({lat:21, lng:23})
-            }}> change my LOC</button>
-        </div>
-    )
+  return (
+    <div className={styles.mapContainer}>
+      <MapContainer
+        className={styles.mapContainer}
+        center={position}
+        zoom={13}
+        scrollWheelZoom={true}
+      >
+        <TileLayer
+          className={styles.map}
+          attribution='&copy; <a href="https://www.openstreetmap.org/copyright">Arcgis Topo</a> contributors'
+          url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+        />
+        {cities.map((city) => (
+          <Marker
+            position={[city.position.lat, city.position.lng]}
+            key={city.id}
+          >
+            <Popup>
+              A pretty CSS3 popup. <br /> Easily customizable.
+            </Popup>
+          </Marker>
+        ))}
+        <ChangeCenter position={position} />
+        <DetectClick />
+      </MapContainer>
+    </div>
+  );
 }
 
-export default Map
+function ChangeCenter({ position }) {
+  const map = useMap();
+  map.setView(position);
+  return null;
+}
+
+function DetectClick(){
+  const navigate = useNavigate();
+
+  useMapEvent({
+    click: (e) => {
+      const {lat, lng} = e.latlng
+      navigate(`form?lat=${lat}&lng=${lng}`)
+    }
+  })
+}
+
+export default Map;

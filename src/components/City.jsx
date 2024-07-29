@@ -16,14 +16,6 @@ function City() {
   let {id} = useParams()
   const {currentCity, getCity} = useCities()
   const { cityName, emoji, date, notes } = currentCity;
-  console.log(currentCity)
-  // TEMP DATA
-  // const currentCity = {
-  //   cityName: "Lisbon",
-  //   emoji: "🇵🇹",
-  //   date: "2027-10-31T15:59:59.138Z",
-  //   notes: "My favorite city so far!",
-  // };
 
   useEffect(()=> {
     getCity(id)
