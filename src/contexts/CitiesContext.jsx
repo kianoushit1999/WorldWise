@@ -26,13 +26,31 @@ function CitiesContext({ children }) {
       .finally(setIsLoading(false));
   }
 
+  function createCity(city) {
+    setIsLoading(true)
+    axios.post("http://localhost:5555/cities", city).then(
+      response => setCities([...cities, response.data])
+    ).finally(setIsLoading(false));
+  }
+
+  function deleteCity(cityId) {
+    console.log(cityId)
+    setIsLoading(true)
+    console.log(`http://localhost:5555/cities/${cityId}`)
+    axios.delete(`http://localhost:5555/cities/${cityId}`)
+    .then(setCities(cities => cities.filter((city) => city.id !== cityId)))
+    .finally(setIsLoading(false));
+  }
+
   return (
     <Cntx.Provider
       value={{
         cities,
         isLoading,
         getCity,
-        currentCity
+        currentCity,
+        createCity,
+        deleteCity
       }}
     >
       {children}
